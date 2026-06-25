@@ -3,6 +3,8 @@ package com.taa.auth.security.controller;
 import com.taa.auth.security.dto.AuthenticationRequest;
 import com.taa.auth.security.dto.AuthenticationResponse;
 import com.taa.auth.security.dto.RegisterRequest;
+import com.taa.auth.security.feign.clients.StockClient;
+import com.taa.auth.security.feign.model.ProductRequest;
 import com.taa.auth.security.model.User;
 import com.taa.auth.security.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +23,27 @@ import java.util.List;
 public class AuthenticationController {
 
     private final AuthService authService;
+    private final StockClient stockClient;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
         return ResponseEntity.ok(this.authService.register(request));
+    }
+
+    @PostMapping("/registerAndStock")
+    public ResponseEntity<String> registerAndStock(@RequestBody RegisterRequest request,@RequestBody ProductRequest productRequest){
+        AuthenticationResponse user=this.authService.register(request);
+        Long userId = this.authService.getAll().stream()
+                .filter(u -> u.getEmail().equals(request.getEmail()))
+                .findFirst()
+                .map(User::getId)
+                .orElse(null);
+        if (userId != null) {
+            productRequest.setUserId(userId);
+        return ResponseEntity.ok(this.stockClient.saveProduct(productRequest).getBody());
+        } else {
+            return ResponseEntity.badRequest().body("User registration failed, cannot create product.");
+        }
     }
 
     @PostMapping("/login")
