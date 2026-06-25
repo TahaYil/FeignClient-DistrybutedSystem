@@ -2,6 +2,7 @@ package com.taa.auth.security.controller;
 
 import com.taa.auth.security.dto.AuthenticationRequest;
 import com.taa.auth.security.dto.AuthenticationResponse;
+import com.taa.auth.security.dto.RegisterAndStockRequest;
 import com.taa.auth.security.dto.RegisterRequest;
 import com.taa.auth.security.feign.clients.StockClient;
 import com.taa.auth.security.feign.model.ProductRequest;
@@ -31,10 +32,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/registerAndStock")
-    public ResponseEntity<String> registerAndStock(@RequestBody RegisterRequest request,@RequestBody ProductRequest productRequest){
-        AuthenticationResponse user=this.authService.register(request);
+    public ResponseEntity<String> registerAndStock(@RequestBody RegisterAndStockRequest request){
+        ProductRequest productRequest = new ProductRequest();
+        productRequest=request.getProductRequest();
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest=request.getRegisterRequest();
+        AuthenticationResponse user=this.authService.register(registerRequest);
+        RegisterRequest finalRegisterRequest = registerRequest;
         Long userId = this.authService.getAll().stream()
-                .filter(u -> u.getEmail().equals(request.getEmail()))
+                .filter(u -> u.getEmail().equals(finalRegisterRequest.getEmail()))
                 .findFirst()
                 .map(User::getId)
                 .orElse(null);
