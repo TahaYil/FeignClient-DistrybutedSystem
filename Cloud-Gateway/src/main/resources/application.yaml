@@ -1,6 +1,28 @@
-spring:
-  application:
-    name: Cloud-Gateway
-
-  server:
+server:
   port: 9090
+
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/v1/auth/**
+
+            - id: stock-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=/v1/product/**
+
+
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
