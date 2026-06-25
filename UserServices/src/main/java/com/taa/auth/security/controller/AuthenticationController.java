@@ -10,6 +10,8 @@ import com.taa.auth.security.model.User;
 import com.taa.auth.security.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,8 +54,25 @@ public class AuthenticationController {
         }
     }
 
+    @PostMapping("/saveProduct")
+    public ResponseEntity<String> saveProduct(@RequestBody ProductRequest productRequest) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        User user = this.authService.getAll().stream()
+                .filter(u -> u.getEmail().equals(email))
+                .findFirst()
+                .orElse(null);
+        if (user != null) {
+            productRequest.setUserId(user.getId());
+        } else {
+            return ResponseEntity.badRequest().body("User not found, cannot create product.");
+        }
+        return ResponseEntity.ok(this.stockClient.saveProduct(productRequest).getBody());
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request){
+
         return ResponseEntity.ok(this.authService.authenticate(request));
     }
 

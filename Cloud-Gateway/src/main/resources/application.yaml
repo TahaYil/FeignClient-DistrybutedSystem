@@ -8,6 +8,20 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        # SENİN YAPINA EKLEDİĞİMİZ TEK SATIR BURASI (Doğru girinti ile):
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:5173"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
       server:
         webflux:
           routes:
@@ -20,8 +34,6 @@ spring:
               uri: http://localhost:8082
               predicates:
                 - Path=/v1/product/**
-
-
 
 logging:
   level:

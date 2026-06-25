@@ -49,7 +49,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(Customizer.withDefaults())
                 .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("v1/auth/**","/error","v1/product/save")
+                        authorize -> authorize.requestMatchers("v1/auth/**","/error","/v1/product/save")
                                 .permitAll()
                                 .anyRequest()
                                 .hasAuthority("ROLE_USER"))

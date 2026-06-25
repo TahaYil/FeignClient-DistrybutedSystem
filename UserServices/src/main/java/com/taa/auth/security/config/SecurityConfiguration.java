@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 //import org.springframework.security.config.Customizer;
 import org.springframework.security.config.Customizer;
@@ -46,10 +47,13 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         logger.info("Configuring security filter chain");
         return security
+                .cors(cors -> cors.disable())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(Customizer.withDefaults())
                 .authorizeHttpRequests(
-                        authorize -> authorize.requestMatchers("/v1/auth/**","/error","/v1/auth/registerAndStock")
+                        authorize -> authorize
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers("/v1/auth/register","/v1/auth/login","/error","/v1/auth/registerAndStock")
                                 .permitAll()
                                 .anyRequest()
                                 .hasAuthority("ROLE_USER"))
